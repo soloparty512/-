@@ -1,0 +1,5 @@
+{
+  "name": "ระบบแจ้งซ่อม (Repair Service System)",
+  "description": "ระบบแจ้งซ่อมออนไลน์ รองรับการทำงานผ่านมือถือ พร้อมระบบ Dashboard สำหรับผู้บริหาร และการจัดการสิทธิ์ผู้ใช้งาน",
+  "requestFramePermissions": []
+}

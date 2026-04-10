@@ -1,0 +1,99 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Fields: email, name, role, employeeId, shift
+    //
+    // Collection: repair_requests
+    // Fields: requesterEmail, machineName, problem, status, urgency, etc.
+    //
+    // Collection: master_data
+    // Fields: types, areas, buildings
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        getUserData().role == 'admin' || 
+        (request.auth.token.email == "soloparty512@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    function isManager() {
+      return hasRole('manager') || isAdmin();
+    }
+
+    function isStaff() {
+      return hasRole('staff') || isManager();
+    }
+
+    function isExecutive() {
+      return hasRole('executive') || isManager();
+    }
+
+    // Domain Validators
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'name', 'role']) &&
+             data.email is string &&
+             data.name is string && data.name.size() < 100 &&
+             data.role in ['admin', 'manager', 'staff', 'executive', 'user'];
+    }
+
+    function isValidRepairRequest(data) {
+      return data.keys().hasAll(['requesterEmail', 'machineName', 'problem', 'status']) &&
+             data.requesterEmail is string &&
+             data.machineName is string && data.machineName.size() < 200 &&
+             data.problem is string && data.problem.size() < 2000 &&
+             data.status in ['pending', 'in-progress', 'completed', 'cancelled'];
+    }
+
+    // Rules
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isAuthenticated() && (
+        (isOwner(userId) && request.resource.data.role == resource.data.role) || 
+        isAdmin() ||
+        (isManager() && request.resource.data.role == resource.data.role)
+      ) && isValidUser(request.resource.data);
+    }
+
+    match /repair_requests/{requestId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidRepairRequest(request.resource.data) && request.resource.data.requesterEmail == request.auth.token.email;
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        isStaff() || 
+        (request.resource.data.requesterEmail == request.auth.token.email && resource.data.status == 'pending')
+      ) && isValidRepairRequest(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /master_data/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isManager();
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile with role and contact info",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "staff", "executive", "user"] },
+        "employeeId": { "type": "string" },
+        "shift": { "type": "string" }
+      },
+      "required": ["email", "name", "role"]
+    },
+    "RepairRequest": {
+      "title": "Repair Request",
+      "description": "A request for machine repair",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "requesterName": { "type": "string" },
+        "requesterId": { "type": "string" },
+        "requesterEmail": { "type": "string" },
+        "requesterShift": { "type": "string" },
+        "machineName": { "type": "string" },
+        "currentTask": { "type": "string" },
+        "problem": { "type": "string" },
+        "area": { "type": "string" },
+        "urgency": { "type": "string", "enum": ["normal", "urgent"] },
+        "status": { "type": "string", "enum": ["pending", "in-progress", "completed", "cancelled"] },
+        "repairType": { "type": "string" },
+        "beforePhoto": { "type": "string" },
+        "afterPhoto": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "repairDuration": { "type": "number" },
+        "failureCause": { "type": "string" },
+        "repairAction": { "type": "string" },
+        "technicianName": { "type": "string" },
+        "technicianId": { "type": "string" },
+        "technicianShift": { "type": "string" },
+        "supervisorName": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["timestamp", "requesterEmail", "machineName", "problem", "status"]
+    },
+    "MasterData": {
+      "title": "Master Data",
+      "description": "Configuration data for the system",
+      "type": "object",
+      "properties": {
+        "types": { "type": "array", "items": { "type": "string" } },
+        "areas": { "type": "array", "items": { "type": "string" } },
+        "buildings": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/repair_requests/{requestId}": {
+      "schema": "RepairRequest",
+      "description": "Repair requests collection"
+    },
+    "/master_data/config": {
+      "schema": "MasterData",
+      "description": "System configuration"
+    }
+  }
+}

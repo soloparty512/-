@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&display=swap');
+
+@theme {
+  --font-sans: "Inter", "Sarabun", ui-sans-serif, system-ui, sans-serif;
+  --color-app-primary: #2563eb;
+  --color-app-secondary: #f97316;
+  --color-app-bg: #f8fafc;
+  --color-app-border: #e2e8f0;
+  --color-app-surface: #ffffff;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-app-bg text-slate-900 antialiased;
+  }
+}
+
+@layer components {
+  .retro-card {
+    @apply bg-app-surface border border-app-border p-6 rounded-2xl shadow-sm transition-all duration-300;
+  }
+  
+  .retro-button {
+    @apply px-6 py-2.5 border border-app-border font-semibold transition-all duration-200 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-50 active:scale-95;
+  }
+  
+  .retro-button:disabled {
+    @apply opacity-50 cursor-not-allowed grayscale;
+  }
+  
+  .retro-button-primary {
+    @apply px-6 py-2.5 font-semibold transition-all duration-200 bg-app-primary text-white hover:bg-blue-700 rounded-xl flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 active:scale-95;
+  }
+  
+  .retro-button-secondary {
+    @apply px-6 py-2.5 font-semibold transition-all duration-200 bg-app-secondary text-white hover:bg-orange-600 rounded-xl flex items-center justify-center gap-2 shadow-md shadow-orange-500/20 active:scale-95;
+  }
+  
+  .retro-input {
+    @apply w-full px-4 py-2.5 bg-white border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-app-primary/20 focus:border-app-primary transition-all duration-200;
+  }
+  
+  .retro-label {
+    @apply block text-sm font-semibold mb-1.5 text-slate-600 ml-1;
+  }
+
+  /* Modern Badge Styles */
+  .badge {
+    @apply px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border;
+  }
+  
+  .badge-pending { @apply bg-amber-50 text-amber-600 border-amber-200; }
+  .badge-progress { @apply bg-blue-50 text-blue-600 border-blue-200; }
+  .badge-completed { @apply bg-emerald-50 text-emerald-600 border-emerald-200; }
+  .badge-urgent { @apply bg-rose-50 text-rose-600 border-rose-200 animate-pulse; }
+}
