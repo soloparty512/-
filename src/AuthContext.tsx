@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db, googleProvider } from './firebase';
 import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { UserProfile } from './types';
 
 interface AuthContextType {
@@ -57,6 +57,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!profile) return;
+
+    const updatePresence = async (status: boolean) => {
+      try {
+        await updateDoc(doc(db, 'users', profile.uid), {
+          isOnline: status,
+          lastActive: Timestamp.now()
+        });
+      } catch (error) {
+        console.error('Error updating presence:', error);
+      }
+    };
+
+    // Set online on mount/user change
+    updatePresence(true);
+
+    // Heartbeat every 2 minutes
+    const heartbeat = setInterval(() => {
+      updatePresence(true);
+    }, 120000);
+
+    return () => {
+      clearInterval(heartbeat);
+      updatePresence(false);
+    };
+  }, [profile]);
 
   const login = async () => {
     try {

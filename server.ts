@@ -1,5 +1,4 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import nodemailer from "nodemailer";
@@ -12,6 +11,15 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", mode: process.env.NODE_ENV || "production" });
+  });
+
+  // Determine if we are in development mode
+  const isDev = process.env.NODE_ENV === "development";
+  console.log(`Server starting in ${isDev ? 'development' : 'production'} mode...`);
 
   // API Route for LINE Notify
   app.post("/api/notify", async (req, res) => {
@@ -75,17 +83,23 @@ async function startServer() {
   });
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  if (isDev) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
+    console.log("Vite development middleware loaded");
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    const distPath = path.resolve(__dirname, "dist");
+    const indexPath = path.join(distPath, "index.html");
+    console.log(`Serving static files from: ${distPath}`);
+    console.log(`Fallback index.html path: ${indexPath}`);
+    
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.sendFile(indexPath);
     });
   }
 

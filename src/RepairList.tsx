@@ -35,6 +35,8 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
   const [technicians, setTechnicians] = useState<UserProfile[]>([]);
   const [assignedTechId, setAssignedTechId] = useState('');
   const [assignedTechName, setAssignedTechName] = useState('');
+  const [repairType, setRepairType] = useState('');
+  const [failureCause, setFailureCause] = useState('');
 
   useEffect(() => {
     if (initialView) {
@@ -211,6 +213,8 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
       setAfterPhotoPreview(null);
       setSupervisorName('');
       setRepairAction('');
+      setRepairType('');
+      setFailureCause('');
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, 'repair_requests');
     } finally {
@@ -262,14 +266,14 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
             className="p-3 bg-white hover:bg-slate-50 border border-app-border rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95"
             title="หน้าแรก"
           >
-            <Home size={20} className="text-slate-600" />
+            <Home className="w-5 h-5 shrink-0 text-slate-600" />
           </button>
           <button 
             onClick={() => onNavigate?.('home')}
             className="p-3 bg-white hover:bg-slate-50 border border-app-border rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95"
             title="ย้อนกลับ"
           >
-            <ArrowLeft size={20} className="text-slate-600" />
+            <ArrowLeft className="w-5 h-5 shrink-0 text-slate-600" />
           </button>
           <div className="h-10 w-[1px] bg-app-border mx-2 hidden md:block" />
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 uppercase">
@@ -355,15 +359,15 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                   <h3 className="text-lg font-bold text-slate-900 truncate mb-1">{req.machineName}</h3>
                   <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-500 font-medium">
                     <div className="flex items-center gap-1.5">
-                      <MapPin size={12} className="text-slate-400" />
-                      <span>{req.area}</span>
+                      <MapPin size={12} className="text-slate-400 shrink-0" />
+                      <span>{req.building ? `${req.building} • ` : ''}{req.area}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <User size={12} className="text-slate-400" />
+                      <User size={12} className="text-slate-400 shrink-0" />
                       <span>{req.requesterName}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Clock size={12} className="text-slate-400" />
+                      <Clock size={12} className="text-slate-400 shrink-0" />
                       <span>{format(req.timestamp.toDate(), 'd MMM yy HH:mm', { locale: th })}</span>
                     </div>
                   </div>
@@ -469,7 +473,7 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                 <div className={`p-4 rounded-2xl shadow-lg ${
                   selectedRequest.urgency === 'urgent' ? 'bg-rose-500 text-white' : 'bg-app-primary text-white'
                 }`}>
-                  <Wrench size={28} />
+                  <Wrench size={28} className="shrink-0" />
                 </div>
                 <div>
                   <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">{selectedRequest.machineName}</h3>
@@ -489,7 +493,7 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                 onClick={() => setSelectedRequest(null)} 
                 className="p-3 hover:bg-white hover:shadow-md rounded-2xl transition-all text-slate-400 hover:text-slate-900 border border-transparent hover:border-slate-100"
               >
-                <XCircle size={24} />
+                <XCircle size={24} className="shrink-0" />
               </button>
             </div>
 
@@ -510,8 +514,8 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                       </div>
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200/50">
                         <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">พื้นที่</p>
-                          <p className="text-sm font-bold text-slate-700">{selectedRequest.area}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">อาคาร / พื้นที่</p>
+                          <p className="text-sm font-bold text-slate-700">{selectedRequest.building ? `${selectedRequest.building} - ` : ''}{selectedRequest.area}</p>
                         </div>
                         <div>
                           <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">วันเวลาที่แจ้ง</p>
@@ -555,6 +559,12 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                           {selectedRequest.urgency === 'urgent' ? 'ด่วนมาก' : 'ปกติ'}
                         </span>
                       </div>
+                      {selectedRequest.repairType && (
+                        <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100">
+                          <span className="text-sm font-bold text-slate-500">ประเภทงาน</span>
+                          <span className="text-sm font-bold text-slate-700">{selectedRequest.repairType}</span>
+                        </div>
+                      )}
                       {selectedRequest.startTime && (
                         <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100">
                           <span className="text-sm font-bold text-slate-500">เริ่มดำเนินการ</span>
@@ -575,12 +585,21 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                       <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">ผู้รับผิดชอบ</h4>
                       <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                         <div className="w-10 h-10 bg-app-primary/10 rounded-xl flex items-center justify-center text-app-primary">
-                          <User size={20} />
+                          <User size={20} className="shrink-0" />
                         </div>
                         <div>
                           <p className="text-sm font-bold text-slate-900">{selectedRequest.technicianName}</p>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Technician</p>
                         </div>
+                      </div>
+                    </section>
+                  )}
+
+                  {selectedRequest.failureCause && (
+                    <section>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">สาเหตุที่พบ</h4>
+                      <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 text-slate-700 font-medium text-sm">
+                        {selectedRequest.failureCause}
                       </div>
                     </section>
                   )}
@@ -614,7 +633,7 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
               {(profile?.role === 'staff' || profile?.role === 'admin' || profile?.role === 'manager') && (
                 <div className="mt-12 pt-12 border-t border-slate-100">
                   <h4 className="text-lg font-extrabold text-slate-900 mb-6 flex items-center gap-2 uppercase tracking-tight">
-                    <Settings className="text-app-primary" />
+                    <Settings className="text-app-primary shrink-0" />
                     การจัดการงานซ่อม
                   </h4>
                   
@@ -640,14 +659,17 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                         </select>
                       </div>
                       <div>
-                        <label className="retro-label">หรือระบุชื่อช่าง (กรณีไม่มีในระบบ)</label>
-                        <input 
-                          type="text"
+                        <label className="retro-label">ประเภทงานซ่อม</label>
+                        <select 
                           className="retro-input"
-                          placeholder="ระบุชื่อช่าง..."
-                          value={assignedTechName}
-                          onChange={(e) => setAssignedTechName(e.target.value)}
-                        />
+                          value={repairType}
+                          onChange={(e) => setRepairType(e.target.value)}
+                        >
+                          <option value="">-- เลือกประเภท --</option>
+                          {masterData?.types.map(t => (
+                            <option key={t} value={t}>{t}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   )}
@@ -666,9 +688,19 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                           />
                         </div>
                         <div>
-                          <label className="retro-label">วิธีแก้ไข / การดำเนินการ</label>
+                          <label className="retro-label">สาเหตุของปัญหา</label>
                           <input 
                             className="retro-input"
+                            placeholder="ระบุสาเหตุที่พบ..."
+                            value={failureCause}
+                            onChange={(e) => setFailureCause(e.target.value)}
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="retro-label">วิธีแก้ไข / การดำเนินการ</label>
+                          <textarea 
+                            className="retro-input"
+                            rows={2}
                             placeholder="ระบุวิธีแก้ไขที่ดำเนินการ..."
                             value={repairAction}
                             onChange={(e) => setRepairAction(e.target.value)}
@@ -688,7 +720,7 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                             </div>
                           ) : (
                             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 group-hover/upload:text-app-primary group-hover/upload:bg-app-primary/5 transition-all">
-                              <Camera size={32} />
+                              <Camera size={32} className="shrink-0" />
                             </div>
                           )}
                           <input 
@@ -712,7 +744,8 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                         disabled={updateLoading || (!assignedTechId && !assignedTechName)}
                         onClick={() => handleUpdateStatus(selectedRequest.id, 'in-progress', { 
                           technicianName: assignedTechName || 'Unknown', 
-                          technicianId: assignedTechId || 'no-id' 
+                          technicianId: assignedTechId || 'no-id',
+                          repairType: repairType || 'ทั่วไป'
                         })}
                         className="flex-1 retro-button-primary py-4"
                       >
@@ -724,7 +757,7 @@ const RepairList: React.FC<RepairListProps> = ({ onNavigate, initialView = 'list
                         disabled={updateLoading}
                         onClick={() => handleUpdateStatus(selectedRequest.id, 'completed', { 
                           repairAction: repairAction || 'แก้ไขเรียบร้อย',
-                          failureCause: 'เสื่อมสภาพตามการใช้งาน',
+                          failureCause: failureCause || 'เสื่อมสภาพตามการใช้งาน',
                           supervisorName: supervisorName || 'ยังไม่ได้ระบุ'
                         })}
                         className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95"

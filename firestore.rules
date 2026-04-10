@@ -58,7 +58,9 @@ service cloud.firestore {
       return data.keys().hasAll(['email', 'name', 'role']) &&
              data.email is string &&
              data.name is string && data.name.size() < 100 &&
-             data.role in ['admin', 'manager', 'staff', 'executive', 'user'];
+             data.role in ['admin', 'manager', 'staff', 'executive', 'user'] &&
+             (!('isOnline' in data) || data.isOnline is bool) &&
+             (!('lastActive' in data) || data.lastActive is timestamp);
     }
 
     function isValidRepairRequest(data) {

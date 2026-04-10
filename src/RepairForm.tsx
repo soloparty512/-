@@ -21,6 +21,7 @@ const RepairForm: React.FC<{ onSuccess: () => void, onNavigate?: (tab: string) =
     currentTask: '',
     problem: '',
     area: '',
+    building: '',
     urgency: 'normal' as Urgency,
     employeeId: profile?.employeeId || '',
     shift: profile?.shift || '',
@@ -73,6 +74,7 @@ const RepairForm: React.FC<{ onSuccess: () => void, onNavigate?: (tab: string) =
         currentTask: formData.currentTask || '',
         problem: formData.problem || '',
         area: formData.area || '',
+        building: formData.building || '',
         urgency: formData.urgency || 'normal',
         status: 'pending',
         beforePhoto: photoUrl || '',
@@ -160,14 +162,14 @@ const RepairForm: React.FC<{ onSuccess: () => void, onNavigate?: (tab: string) =
           className="p-3 bg-white hover:bg-slate-50 border border-app-border rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95"
           title="หน้าแรก"
         >
-          <Home size={20} className="text-slate-600" />
+          <Home size={20} className="text-slate-600 shrink-0" />
         </button>
         <button 
           onClick={() => onNavigate?.('home')}
           className="p-3 bg-white hover:bg-slate-50 border border-app-border rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95"
           title="ย้อนกลับ"
         >
-          <ArrowLeft size={20} className="text-slate-600" />
+          <ArrowLeft size={20} className="text-slate-600 shrink-0" />
         </button>
       </div>
 
@@ -178,7 +180,7 @@ const RepairForm: React.FC<{ onSuccess: () => void, onNavigate?: (tab: string) =
       >
         <div className="p-10 border-b border-slate-100 bg-slate-50/50 flex items-center gap-6">
           <div className="bg-app-primary p-4 rounded-2xl text-white shadow-lg shadow-blue-500/20">
-            <Wrench size={28} />
+            <Wrench size={28} className="shrink-0" />
           </div>
           <div>
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight uppercase">แบบฟอร์มแจ้งซ่อม</h2>
@@ -200,7 +202,21 @@ const RepairForm: React.FC<{ onSuccess: () => void, onNavigate?: (tab: string) =
               />
             </div>
             <div className="space-y-2">
-              <label className="retro-label">พื้นที่ / สถานที่</label>
+              <label className="retro-label">อาคาร / สถานที่</label>
+              <select
+                required
+                className="retro-input"
+                value={formData.building}
+                onChange={e => setFormData({ ...formData, building: e.target.value })}
+              >
+                <option value="">เลือกอาคาร</option>
+                {masterData?.buildings.map(b => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="retro-label">พื้นที่ / แผนก</label>
               <select
                 required
                 className="retro-input"
@@ -211,7 +227,6 @@ const RepairForm: React.FC<{ onSuccess: () => void, onNavigate?: (tab: string) =
                 {masterData?.areas.map(area => (
                   <option key={area} value={area}>{area}</option>
                 ))}
-                {!masterData && <option value="Production Line 1">Production Line 1</option>}
               </select>
             </div>
           </div>
@@ -296,12 +311,12 @@ const RepairForm: React.FC<{ onSuccess: () => void, onNavigate?: (tab: string) =
                 <div className="relative">
                   <img src={photoPreview} alt="Preview" className="max-h-48 rounded-2xl border border-slate-100 shadow-xl" />
                   <div className="absolute -top-3 -right-3 bg-emerald-500 text-white rounded-full p-2 border-4 border-white shadow-lg">
-                    <Check size={16} />
+                    <Check size={16} className="shrink-0" />
                   </div>
                 </div>
               ) : (
                 <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-300 group-hover/upload:text-app-primary group-hover/upload:bg-app-primary/5 transition-all shadow-sm">
-                  <Camera size={32} />
+                  <Camera size={32} className="shrink-0" />
                 </div>
               )}
               <input 
@@ -326,7 +341,7 @@ const RepairForm: React.FC<{ onSuccess: () => void, onNavigate?: (tab: string) =
               <span className="animate-pulse">กำลังส่งข้อมูล...</span>
             ) : (
               <>
-                <Send size={20} />
+                <Send size={20} className="shrink-0" />
                 <span className="text-lg">ส่งข้อมูลแจ้งซ่อม</span>
               </>
             )}

@@ -6,7 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area 
 } from 'recharts';
-import { ClipboardList, Clock, CheckCircle2, AlertTriangle, TrendingUp, User, Calendar, Zap, Home, ArrowLeft } from 'lucide-react';
+import { ClipboardList, Clock, CheckCircle2, TriangleAlert, TrendingUp, User, Calendar, Zap, Home, ArrowLeft } from 'lucide-react';
 import { format, subDays, startOfDay, isAfter, differenceInMinutes } from 'date-fns';
 import { th } from 'date-fns/locale';
 
@@ -37,17 +37,24 @@ const Dashboard: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNavigat
   };
 
   // Data for Charts
-  const typeData = [
-    { name: 'เครื่องจักร', value: requests.filter(r => r.repairType === 'machine' || !r.repairType).length },
-    { name: 'ไฟฟ้า', value: requests.filter(r => r.repairType === 'electrical').length },
-    { name: 'ประปา', value: requests.filter(r => r.repairType === 'plumbing').length },
-    { name: 'IT', value: requests.filter(r => r.repairType === 'it').length },
-  ].filter(d => d.value > 0);
+  const typeData = Array.from(new Set(requests.map(r => r.repairType || 'ทั่วไป')))
+    .map(type => ({
+      name: type,
+      value: requests.filter(r => (r.repairType || 'ทั่วไป') === type).length
+    }))
+    .sort((a, b) => b.value - a.value);
 
   const areaData = Array.from(new Set(requests.map(r => r.area))).map(area => ({
     name: area,
     count: requests.filter(r => r.area === area).length
   })).sort((a, b) => b.count - a.count).slice(0, 5);
+
+  const buildingData = Array.from(new Set(requests.map(r => r.building || 'ไม่ระบุ')))
+    .map(building => ({
+      name: building,
+      count: requests.filter(r => (r.building || 'ไม่ระบุ') === building).length
+    }))
+    .sort((a, b) => b.count - a.count);
 
   const technicianData = Array.from(new Set(requests.filter(r => r.status === 'completed' && r.technicianName).map(r => r.technicianName as string)))
     .map(name => ({
@@ -135,14 +142,14 @@ const Dashboard: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNavigat
             className="p-3 bg-white hover:bg-slate-50 border border-app-border rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95"
             title="หน้าแรก"
           >
-            <Home size={20} className="text-slate-600" />
+            <Home className="w-5 h-5 shrink-0 text-slate-600" />
           </button>
           <button 
             onClick={() => onNavigate?.('home')}
             className="p-3 bg-white hover:bg-slate-50 border border-app-border rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95"
             title="ย้อนกลับ"
           >
-            <ArrowLeft size={20} className="text-slate-600" />
+            <ArrowLeft className="w-5 h-5 shrink-0 text-slate-600" />
           </button>
           <div className="h-10 w-[1px] bg-app-border mx-2 hidden md:block" />
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 uppercase">Dashboard ภาพรวม</h2>
@@ -157,8 +164,8 @@ const Dashboard: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNavigat
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all group">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-blue-50 text-app-primary rounded-2xl group-hover:bg-app-primary group-hover:text-white transition-colors">
-              <ClipboardList size={24} />
+            <div className="p-3 bg-blue-50 text-app-primary rounded-2xl group-hover:bg-app-primary group-hover:text-white transition-colors flex items-center justify-center">
+              <ClipboardList className="w-6 h-6 shrink-0" />
             </div>
             <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Total</span>
           </div>
@@ -168,8 +175,8 @@ const Dashboard: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNavigat
 
         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-amber-500/5 transition-all group">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-amber-50 text-amber-500 rounded-2xl group-hover:bg-amber-500 group-hover:text-white transition-colors">
-              <Clock size={24} />
+            <div className="p-3 bg-amber-50 text-amber-500 rounded-2xl group-hover:bg-amber-500 group-hover:text-white transition-colors flex items-center justify-center">
+              <Clock className="w-6 h-6 shrink-0" />
             </div>
             <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Pending</span>
           </div>
@@ -179,8 +186,8 @@ const Dashboard: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNavigat
 
         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-emerald-500/5 transition-all group">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-emerald-50 text-emerald-500 rounded-2xl group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-              <CheckCircle2 size={24} />
+            <div className="p-3 bg-emerald-50 text-emerald-500 rounded-2xl group-hover:bg-emerald-500 group-hover:text-white transition-colors flex items-center justify-center">
+              <CheckCircle2 className="w-6 h-6 shrink-0" />
             </div>
             <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Done</span>
           </div>
@@ -190,8 +197,8 @@ const Dashboard: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNavigat
 
         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-rose-500/5 transition-all group">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-rose-50 text-rose-500 rounded-2xl group-hover:bg-rose-500 group-hover:text-white transition-colors">
-              <AlertTriangle size={24} />
+            <div className="p-3 bg-rose-50 text-rose-500 rounded-2xl group-hover:bg-rose-500 group-hover:text-white transition-colors flex items-center justify-center">
+              <TriangleAlert className="w-6 h-6 shrink-0" />
             </div>
             <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Urgent</span>
           </div>
@@ -201,8 +208,8 @@ const Dashboard: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNavigat
 
         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-orange-500/5 transition-all group">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-orange-50 text-orange-500 rounded-2xl group-hover:bg-orange-500 group-hover:text-white transition-colors">
-              <Zap size={24} />
+            <div className="p-3 bg-orange-50 text-orange-500 rounded-2xl group-hover:bg-orange-500 group-hover:text-white transition-colors flex items-center justify-center">
+              <Zap className="w-6 h-6 shrink-0" />
             </div>
             <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Response</span>
           </div>
@@ -213,6 +220,33 @@ const Dashboard: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNavigat
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400 mb-8 flex items-center gap-3">
+            <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+            แยกตามอาคาร / สถานที่
+          </h4>
+          <div className="h-72">
+            {buildingData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={buildingData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#64748b' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#64748b' }} />
+                  <Tooltip 
+                    cursor={{ fill: '#f8fafc' }}
+                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                  />
+                  <Bar dataKey="count" fill="#6366f1" radius={[6, 6, 0, 0]} barSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-slate-300">
+                <p className="font-bold uppercase tracking-widest text-xs">ไม่มีข้อมูลอาคาร</p>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
           <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400 mb-8 flex items-center gap-3">
             <div className="w-2 h-2 bg-app-primary rounded-full" />

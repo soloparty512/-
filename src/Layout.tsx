@@ -31,7 +31,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
       {/* Mobile Header */}
       <header className="md:hidden bg-retro-blue text-white p-4 flex items-center justify-between border-b-2 border-retro-border sticky top-0 z-[60]">
         <div className="flex items-center space-x-2">
-          <Wrench size={24} className="text-retro-orange" />
+          <Wrench size={24} className="text-retro-orange shrink-0" />
           <h1 className="text-xl font-bold tracking-tighter uppercase">REPAIR SYS</h1>
         </div>
         <button 
@@ -68,7 +68,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
             <div className="p-8 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="bg-app-primary p-2 rounded-lg">
-                  <Wrench size={24} className="text-white" />
+                  <Wrench size={24} className="text-white shrink-0" />
                 </div>
                 <h1 className="text-xl font-extrabold tracking-tight">REPAIR<span className="text-app-primary">PRO</span></h1>
               </div>
@@ -95,7 +95,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
                   }`}
                 >
-                  <item.icon size={20} />
+                  <item.icon className="w-5 h-5 shrink-0" />
                   <span className="tracking-tight">{item.label}</span>
                 </button>
               ))}

@@ -6,6 +6,7 @@ import RepairForm from './RepairForm';
 import RepairList from './RepairList';
 import Dashboard from './Dashboard';
 import AdminPanel from './AdminPanel';
+import OnlineUsers from './OnlineUsers';
 import { LogIn, Wrench } from 'lucide-react';
 
 const AppContent: React.FC = () => {
@@ -62,6 +63,7 @@ const AppContent: React.FC = () => {
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
       {renderContent()}
+      <OnlineUsers />
     </Layout>
   );
 };

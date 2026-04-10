@@ -8,6 +8,10 @@
   --color-app-bg: #f8fafc;
   --color-app-border: #e2e8f0;
   --color-app-surface: #ffffff;
+  --color-retro-blue: #1e3a8a;
+  --color-retro-orange: #f97316;
+  --color-retro-bg: #f8fafc;
+  --color-retro-border: #e2e8f0;
 }
 
 @layer base {

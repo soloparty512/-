@@ -7,6 +7,8 @@ export interface UserProfile {
   role: UserRole;
   employeeId?: string;
   shift?: string;
+  lastActive?: any;
+  isOnline?: boolean;
 }
 
 export type RepairStatus = 'pending' | 'in-progress' | 'completed' | 'cancelled';
@@ -23,6 +25,7 @@ export interface RepairRequest {
   currentTask: string;
   problem: string;
   area: string;
+  building?: string;
   urgency: Urgency;
   status: RepairStatus;
   repairType?: string;

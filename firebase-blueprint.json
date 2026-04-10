@@ -9,7 +9,9 @@
         "name": { "type": "string" },
         "role": { "type": "string", "enum": ["admin", "staff", "executive", "user"] },
         "employeeId": { "type": "string" },
-        "shift": { "type": "string" }
+        "shift": { "type": "string" },
+        "lastActive": { "type": "string", "format": "date-time" },
+        "isOnline": { "type": "boolean" }
       },
       "required": ["email", "name", "role"]
     },

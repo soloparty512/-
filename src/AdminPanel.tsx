@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, handleFirestoreError, OperationType } from './firebase';
-import { collection, query, onSnapshot, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { RepairRequest, UserProfile, MasterData } from './types';
 import { UserCog, Database, Save, Plus, Trash2, Bell, Download, FileSpreadsheet, Mail, Home, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
@@ -29,12 +29,19 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
     if (!tech) return;
 
     try {
-      await updateDoc(doc(db, 'repair_requests', requestId), {
+      const request = requests.find(r => r.id === requestId);
+      const updateData: any = {
         technicianId: tech.uid,
         technicianName: tech.name,
         technicianShift: tech.shift || '',
         status: 'in-progress' // Auto update status to in-progress when assigned
-      });
+      };
+
+      if (!request?.startTime) {
+        updateData.startTime = Timestamp.now();
+      }
+
+      await updateDoc(doc(db, 'repair_requests', requestId), updateData);
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, 'repair_requests');
     }
@@ -209,14 +216,14 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
             className="p-3 bg-white hover:bg-slate-50 border border-app-border rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95"
             title="หน้าแรก"
           >
-            <Home size={20} className="text-slate-600" />
+            <Home className="w-5 h-5 shrink-0 text-slate-600" />
           </button>
           <button 
             onClick={() => onNavigate?.('home')}
             className="p-3 bg-white hover:bg-slate-50 border border-app-border rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-95"
             title="ย้อนกลับ"
           >
-            <ArrowLeft size={20} className="text-slate-600" />
+            <ArrowLeft className="w-5 h-5 shrink-0 text-slate-600" />
           </button>
           <div className="h-10 w-[1px] bg-app-border mx-2 hidden md:block" />
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 uppercase">จัดการระบบ</h2>
@@ -229,7 +236,7 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
               activeSubTab === 'users' ? 'bg-white text-app-primary shadow-sm' : 'text-slate-500 hover:bg-white/50'
             }`}
           >
-            <UserCog size={16} /> ผู้ใช้งาน
+            <UserCog size={16} className="shrink-0" /> ผู้ใช้งาน
           </button>
           <button 
             onClick={() => setActiveSubTab('assignments')}
@@ -237,7 +244,7 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
               activeSubTab === 'assignments' ? 'bg-white text-app-primary shadow-sm' : 'text-slate-500 hover:bg-white/50'
             }`}
           >
-            <Plus size={16} /> มอบหมายงาน
+            <Plus size={16} className="shrink-0" /> มอบหมายงาน
           </button>
           <button 
             onClick={() => setActiveSubTab('data')}
@@ -245,7 +252,7 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
               activeSubTab === 'data' ? 'bg-white text-app-primary shadow-sm' : 'text-slate-500 hover:bg-white/50'
             }`}
           >
-            <Database size={16} /> ข้อมูลระบบ
+            <Database size={16} className="shrink-0" /> ข้อมูลระบบ
           </button>
           <button 
             onClick={() => setActiveSubTab('export')}
@@ -253,7 +260,7 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
               activeSubTab === 'export' ? 'bg-white text-app-primary shadow-sm' : 'text-slate-500 hover:bg-white/50'
             }`}
           >
-            <Download size={16} /> ส่งออก
+            <Download size={16} className="shrink-0" /> ส่งออก
           </button>
         </div>
       </div>
@@ -304,7 +311,7 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
                         className="p-3 bg-white text-slate-400 hover:text-app-primary hover:bg-blue-50 border border-slate-100 rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95"
                         title="แก้ไขข้อมูล"
                       >
-                        <UserCog size={18} />
+                        <UserCog className="w-4.5 h-4.5 shrink-0" />
                       </button>
                     </td>
                   </tr>
@@ -341,7 +348,7 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
                       </div>
                       <p className="text-xs font-medium text-slate-500 line-clamp-1">{req.problem}</p>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
-                        {req.area} • {format(req.timestamp.toDate(), 'dd MMM HH:mm', { locale: th })}
+                        {req.building && `${req.building} • `}{req.area} • {format(req.timestamp.toDate(), 'dd MMM HH:mm', { locale: th })}
                       </p>
                     </td>
                     <td className="p-8">
@@ -579,7 +586,44 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
+              <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
+                <div className="w-2 h-2 bg-app-primary rounded-full" />
+                อาคาร / สถานที่
+              </h4>
+              <div className="space-y-4">
+                {masterData.buildings.map((building, idx) => (
+                  <div key={idx} className="flex gap-3 group">
+                    <input 
+                      className="retro-input" 
+                      value={building} 
+                      onChange={(e) => {
+                        const newBuildings = [...masterData.buildings];
+                        newBuildings[idx] = e.target.value;
+                        setMasterData({ ...masterData, buildings: newBuildings });
+                      }}
+                    />
+                    <button 
+                      onClick={() => {
+                        const newBuildings = masterData.buildings.filter((_, i) => i !== idx);
+                        setMasterData({ ...masterData, buildings: newBuildings });
+                      }}
+                      className="p-3 text-rose-500 bg-rose-50 hover:bg-rose-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 size={18} className="shrink-0" />
+                    </button>
+                  </div>
+                ))}
+                <button 
+                  onClick={() => setMasterData({ ...masterData, buildings: [...masterData.buildings, ''] })}
+                  className="w-full py-4 bg-slate-50 text-slate-600 font-bold rounded-2xl hover:bg-slate-100 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+                >
+                  <Plus size={16} className="shrink-0" /> เพิ่มอาคาร
+                </button>
+              </div>
+            </div>
+
             <div className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
               <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
                 <div className="w-2 h-2 bg-indigo-500 rounded-full" />
@@ -660,7 +704,7 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
               onClick={saveMasterData} 
               className="px-12 py-5 bg-app-primary hover:bg-blue-600 text-white font-extrabold rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-3 uppercase tracking-widest"
             >
-              <Save size={20} />
+              <Save size={20} className="shrink-0" />
               <span>บันทึกการตั้งค่าทั้งหมด</span>
             </button>
           </div>
@@ -684,7 +728,7 @@ const AdminPanel: React.FC<{ onNavigate?: (tab: string) => void }> = ({ onNaviga
               onClick={downloadCSV}
               className="w-full py-5 bg-slate-900 hover:bg-slate-800 text-white font-extrabold rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest"
             >
-              <Download size={20} />
+              <Download size={20} className="shrink-0" />
               <span className="text-lg">ดาวน์โหลดไฟล์ CSV</span>
             </button>
           </div>

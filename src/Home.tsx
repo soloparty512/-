@@ -45,9 +45,14 @@ const Home: React.FC<{ onNavigate: (tab: string) => void }> = ({ onNavigate }) =
   return (
     <div className="space-y-12 py-6">
       <div className="text-center space-y-4">
-        <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900">
-          REPAIR <span className="text-app-primary">PRO</span>
-        </h1>
+        <div className="flex flex-col items-center justify-center mb-8">
+          <div className="bg-retro-blue p-5 rounded-3xl text-white shadow-2xl shadow-blue-500/20 mb-6 border-4 border-white">
+            <Wrench size={48} className="shrink-0" />
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 text-center">
+            REPAIR <span className="text-app-primary">PRO</span>
+          </h1>
+        </div>
         <p className="text-lg font-medium text-slate-500 max-w-2xl mx-auto">
           ระบบจัดการงานซ่อมบำรุงอัจฉริยะ เพื่อประสิทธิภาพสูงสุดขององค์กร
         </p>
@@ -64,14 +69,14 @@ const Home: React.FC<{ onNavigate: (tab: string) => void }> = ({ onNavigate }) =
             
             <div className="flex items-start space-x-6 relative z-10">
               <div className={`${f.color} p-4 text-white rounded-2xl shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                <f.icon size={28} />
+                <f.icon className="w-7 h-7 shrink-0" />
               </div>
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-app-primary transition-colors">{f.title}</h3>
                 <p className="text-slate-500 text-sm leading-relaxed mb-6">{f.desc}</p>
                 <div className="flex items-center text-app-primary font-bold text-xs uppercase tracking-widest">
                   <span>เข้าใช้งานระบบ</span>
-                  <ArrowRight size={14} className="ml-2 group-hover:translate-x-2 transition-transform" />
+                  <ArrowRight className="w-3.5 h-3.5 ml-2 shrink-0 group-hover:translate-x-2 transition-transform" />
                 </div>
               </div>
             </div>
